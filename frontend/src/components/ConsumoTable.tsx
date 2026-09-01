@@ -7,31 +7,37 @@ interface Props {
 
 export default function ConsumoTable({ consumos, anio }: Props) {
   const porMes = new Map<number, number>();
-  consumos
-    .filter((c) => c.anio === anio)
-    .forEach((c) => porMes.set(c.mes, c.consumo_m3));
+  consumos.filter((c) => c.anio === anio).forEach((c) => porMes.set(c.mes, c.consumo_m3));
+
+  const mesesConDatos = Array.from(porMes.keys());
+  const ultimoMesConDato = mesesConDatos.length > 0 ? Math.max(...mesesConDatos) : null;
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table className="w-full min-w-[420px] text-left text-sm">
-        <thead className="bg-slate-50 text-slate-600">
-          <tr>
-            <th className="px-4 py-3 font-semibold">Mes</th>
-            <th className="px-4 py-3 font-semibold">Consumo</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
+    <div className="py-4">
+      <h3 className="mb-3 text-sm font-semibold text-ink-soft">Detalle por mes</h3>
+      <table className="w-full text-left text-sm">
+        <tbody className="divide-y divide-line">
           {NOMBRES_MESES.map((nombre, idx) => {
             const mes = idx + 1;
             const valor = porMes.get(mes);
+            const esActual = mes === ultimoMesConDato;
             return (
-              <tr key={mes} className="hover:bg-slate-50">
-                <td className="px-4 py-2.5 text-slate-700">{nombre}</td>
-                <td className="px-4 py-2.5 font-medium text-slate-900">
+              <tr key={mes} className={esActual ? "border-b-2 border-water-600" : ""}>
+                <td
+                  className={`relative py-2.5 pl-3 ${
+                    esActual ? "font-semibold text-ink" : "text-ink-soft"
+                  }`}
+                >
+                  {esActual && (
+                    <span className="absolute bottom-0 left-0 top-0 w-[3px] bg-water-600" />
+                  )}
+                  {nombre}
+                </td>
+                <td className="py-2.5 pr-1 text-right font-mono font-medium text-ink">
                   {valor !== undefined ? (
                     `${valor} m³`
                   ) : (
-                    <span className="text-slate-400">Sin información</span>
+                    <span className="font-sans text-ink-soft">Sin información</span>
                   )}
                 </td>
               </tr>

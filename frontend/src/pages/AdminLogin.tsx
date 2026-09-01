@@ -30,32 +30,32 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-xl font-bold text-slate-900">Panel administrativo</h1>
-        <p className="mt-1 text-sm text-slate-500">Inicie sesión para continuar.</p>
+    <div className="flex min-h-screen items-center justify-center bg-paper px-4">
+      <div className="w-full max-w-sm rounded-xl border border-line border-l-[3px] border-l-water-600 bg-white p-8 shadow-sm">
+        <h1 className="text-xl font-bold text-ink">Panel administrativo</h1>
+        <p className="mt-1 text-sm text-ink-soft">Inicie sesión para continuar.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Correo</label>
+            <label className="mb-1.5 block text-xs text-ink-soft">Correo</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="username"
-              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:ring-2 focus:ring-water-400"
+              className="w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 outline-none focus:border-water-500 focus:bg-white focus:ring-2 focus:ring-water-400"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Contraseña</label>
+            <label className="mb-1.5 block text-xs text-ink-soft">Contraseña</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:ring-2 focus:ring-water-400"
+              className="w-full rounded-lg border border-line-strong bg-paper px-4 py-2.5 outline-none focus:border-water-500 focus:bg-white focus:ring-2 focus:ring-water-400"
             />
           </div>
 
@@ -70,7 +70,7 @@ export default function AdminLogin() {
           </button>
         </form>
 
-        <p className="mt-4 text-xs text-slate-400">
+        <p className="mt-4 text-xs text-ink-soft">
           El usuario administrador se crea una sola vez en Supabase (Authentication → Users), no
           aquí.
         </p>

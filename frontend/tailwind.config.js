@@ -4,19 +4,35 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Teal-forward "water gauge" palette (replaces the generic sky-blue scale)
         water: {
-          50: "#eff9ff",
-          100: "#dcf1ff",
-          200: "#b3e4ff",
-          300: "#75d0ff",
-          400: "#2fb6ff",
-          500: "#0399f2",
-          600: "#0079cf",
-          700: "#0161a8",
-          800: "#06528a",
-          900: "#0a4471",
-          950: "#062b4a",
+          50: "#EEF6F6",
+          100: "#DCEEEE",
+          200: "#B9DDDD",
+          300: "#8FC7C8",
+          400: "#4FC3BE",
+          500: "#1C8C93",
+          600: "#0E5A68",
+          700: "#0A4B57",
+          800: "#08404A",
+          900: "#062F37",
+          950: "#041F24",
         },
+        ink: {
+          DEFAULT: "#12242B",
+          soft: "#5B6E71",
+        },
+        paper: "#F3F7F6",
+        line: {
+          DEFAULT: "#D8E3E1",
+          strong: "#B9CBC9",
+        },
+        moss: "#4B8F6B",
+        clay: "#D98E2B",
+      },
+      fontFamily: {
+        sans: ['"IBM Plex Sans"', "system-ui", "sans-serif"],
+        mono: ['"IBM Plex Mono"', "ui-monospace", "SFMono-Regular", "monospace"],
       },
     },
   },

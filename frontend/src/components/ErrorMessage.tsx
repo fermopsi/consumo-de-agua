@@ -6,7 +6,7 @@ export default function ErrorMessage({ message }: Props) {
   return (
     <div
       role="alert"
-      className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+      className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50/70 p-4 text-sm text-red-700"
     >
       <svg
         className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500"

@@ -3,5 +3,27 @@
 @tailwind utilities;
 
 body {
-  @apply bg-slate-50 text-slate-800;
+  @apply bg-paper text-ink font-sans;
+}
+
+@layer components {
+  /* Structural divider styled like marks on a graduated cylinder —
+     used between sections instead of bordered/shadowed cards. */
+  .tick-rule {
+    height: 7px;
+    background-image: linear-gradient(to right, theme("colors.line.DEFAULT") 1px, transparent 1px);
+    background-size: 14px 100%;
+    background-position: bottom left;
+    border-bottom: 1px solid theme("colors.line.strong");
+  }
+  .tick-rule.tight {
+    height: 5px;
+    background-size: 9px 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gauge-needle {
+    transition: none !important;
+  }
 }

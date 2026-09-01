@@ -1,4 +1,4 @@
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent, DragEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAdminSession } from "../hooks/useAdminSession";
@@ -13,6 +13,7 @@ import { importarArchivo } from "../lib/importer";
 import { AdminStats, MedidorOut, ImportResult } from "../types";
 import ErrorMessage from "../components/ErrorMessage";
 import LoadingSpinner from "../components/LoadingSpinner";
+import StatCard from "../components/StatCard";
 
 export default function AdminDashboard() {
   const { session, loading: sessionLoading } = useAdminSession();
@@ -39,6 +40,7 @@ export default function AdminDashboard() {
   const [overwrite, setOverwrite] = useState(false);
   const [importando, setImportando] = useState(false);
   const [resultadoImport, setResultadoImport] = useState<ImportResult | null>(null);
+  const [dragOver, setDragOver] = useState(false);
 
   useEffect(() => {
     if (!sessionLoading && !session) navigate("/admin");
@@ -111,6 +113,13 @@ export default function AdminDashboard() {
     }
   }
 
+  function handleDrop(e: DragEvent<HTMLLabelElement>) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) setArchivo(file);
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut();
     navigate("/admin");
@@ -119,121 +128,143 @@ export default function AdminDashboard() {
   if (sessionLoading || !session) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-paper">
+      <header className="bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <h1 className="text-sm font-semibold text-slate-800 sm:text-base">Panel administrativo</h1>
+          <h1 className="text-sm font-semibold text-ink sm:text-base">Panel administrativo</h1>
           <button
             onClick={handleLogout}
-            className="shrink-0 text-sm text-slate-500 hover:text-slate-700"
+            className="shrink-0 text-sm text-ink-soft hover:text-ink"
           >
             Cerrar sesión
           </button>
         </div>
+        <div className="tick-rule" />
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8">
-        {error && <ErrorMessage message={error} />}
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+        {error && (
+          <div className="mb-6">
+            <ErrorMessage message={error} />
+          </div>
+        )}
         {loading && <LoadingSpinner label="Cargando panel..." />}
 
         {stats && (
-          <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-            <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
-              <p className="truncate text-[11px] uppercase text-slate-500 sm:text-xs">
-                Total medidores
-              </p>
-              <p className="mt-1 text-lg font-bold text-water-700 sm:text-2xl">
-                {stats.total_medidores}
-              </p>
-            </div>
-            <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
-              <p className="truncate text-[11px] uppercase text-slate-500 sm:text-xs">
-                Total contratos
-              </p>
-              <p className="mt-1 text-lg font-bold text-water-700 sm:text-2xl">
-                {stats.total_contratos}
-              </p>
-            </div>
-            <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
-              <p className="truncate text-[11px] uppercase text-slate-500 sm:text-xs">
-                Registros de consumo
-              </p>
-              <p className="mt-1 text-lg font-bold text-water-700 sm:text-2xl">
-                {stats.total_consumos}
-              </p>
-            </div>
-            <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
-              <p className="truncate text-[11px] uppercase text-slate-500 sm:text-xs">
-                Última importación
-              </p>
-              <p className="mt-1 break-words text-xs font-medium text-slate-700 sm:text-sm">
-                {stats.ultima_importacion
-                  ? new Date(stats.ultima_importacion).toLocaleString()
-                  : "Sin importaciones"}
-              </p>
-              {stats.errores_ultima_importacion > 0 && (
-                <p className="text-xs text-red-500">
-                  {stats.errores_ultima_importacion} errores en la última importación
-                </p>
-              )}
-            </div>
-          </section>
+          <>
+            <section className="grid grid-cols-2 gap-x-4 gap-y-5 py-6 sm:grid-cols-4">
+              <StatCard titulo="Total medidores" valor={String(stats.total_medidores)} />
+              <StatCard titulo="Total contratos" valor={String(stats.total_contratos)} />
+              <StatCard titulo="Registros de consumo" valor={String(stats.total_consumos)} />
+              <StatCard
+                titulo="Última importación"
+                valor={
+                  stats.ultima_importacion
+                    ? new Date(stats.ultima_importacion).toLocaleDateString()
+                    : "—"
+                }
+                subtitulo={
+                  stats.errores_ultima_importacion > 0
+                    ? `${stats.errores_ultima_importacion} errores`
+                    : stats.ultima_importacion
+                    ? new Date(stats.ultima_importacion).toLocaleTimeString()
+                    : "Sin importaciones"
+                }
+                acento={stats.errores_ultima_importacion > 0 ? "up" : "default"}
+              />
+            </section>
+            <div className="tick-rule" />
+          </>
         )}
 
         {/* Import */}
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="font-semibold text-slate-800">Importar Excel / CSV</h2>
-          <p className="mt-1 text-sm text-slate-500">
+        <section className="py-6">
+          <h2 className="text-sm font-semibold text-ink">Importar Excel / CSV</h2>
+          <p className="mt-1 max-w-[60ch] text-xs text-ink-soft">
             El archivo debe contener las columnas: numero_medidor, numero_contrato y los meses
             (enero, febrero, ...). Se procesa aquí mismo, no hace falta entrar a Supabase.
           </p>
-          <form
-            onSubmit={handleImportar}
-            className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
-          >
-            <div className="min-w-0 flex-1 sm:flex-none">
-              <label className="mb-1 block text-xs font-medium text-slate-600">Archivo</label>
+
+          <form onSubmit={handleImportar} className="mt-4">
+            <label
+              htmlFor="archivo-input"
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOver(true);
+              }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleDrop}
+              className={`mb-4 block cursor-pointer rounded-lg border-[1.5px] border-dashed px-5 py-6 text-center text-sm transition ${
+                dragOver
+                  ? "border-water-500 bg-water-50 text-water-700"
+                  : "border-line-strong text-ink-soft"
+              }`}
+            >
+              {archivo ? (
+                <span className="font-medium text-ink">{archivo.name}</span>
+              ) : (
+                <>
+                  <span className="font-semibold text-ink">Arrastra un archivo</span> o haz clic
+                  para seleccionarlo · .csv, .xlsx, .xls
+                </>
+              )}
               <input
+                id="archivo-input"
                 type="file"
                 accept=".csv,.xlsx,.xls"
                 onChange={(e) => setArchivo(e.target.files?.[0] ?? null)}
-                className="w-full text-sm"
+                className="hidden"
               />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Año</label>
-              <input
-                type="number"
-                value={anioImport}
-                onChange={(e) => setAnioImport(Number(e.target.value))}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sm:w-24"
-              />
-            </div>
-            <label className="flex items-center gap-2 text-sm text-slate-600">
-              <input
-                type="checkbox"
-                checked={overwrite}
-                onChange={(e) => setOverwrite(e.target.checked)}
-              />
-              Sobrescribir existentes
             </label>
-            <button
-              type="submit"
-              disabled={!archivo || importando}
-              className="w-full rounded-lg bg-water-600 px-4 py-2 text-sm font-semibold text-white hover:bg-water-700 disabled:opacity-60 sm:w-auto"
-            >
-              {importando ? "Importando..." : "Importar"}
-            </button>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+              <div>
+                <label className="mb-1 block text-xs text-ink-soft">Año</label>
+                <input
+                  type="number"
+                  value={anioImport}
+                  onChange={(e) => setAnioImport(Number(e.target.value))}
+                  className="w-full rounded-lg border border-line-strong bg-white px-3 py-2 text-sm sm:w-24"
+                />
+              </div>
+              <label className="flex items-center gap-2 text-sm text-ink-soft">
+                <input
+                  type="checkbox"
+                  checked={overwrite}
+                  onChange={(e) => setOverwrite(e.target.checked)}
+                />
+                Sobrescribir existentes
+              </label>
+              <button
+                type="submit"
+                disabled={!archivo || importando}
+                className="w-full rounded-lg bg-water-600 px-4 py-2 text-sm font-semibold text-white hover:bg-water-700 disabled:opacity-60 sm:w-auto"
+              >
+                {importando ? "Importando..." : "Importar"}
+              </button>
+            </div>
           </form>
 
           {resultadoImport && (
-            <div className="mt-4 rounded-lg bg-slate-50 p-4 text-sm">
-              <p className="font-medium text-slate-800">Importación completada</p>
-              <ul className="mt-1 space-y-0.5 text-slate-600">
-                <li>Registros procesados: {resultadoImport.registros_procesados}</li>
-                <li>Registros importados: {resultadoImport.registros_importados}</li>
-                <li>Registros con errores: {resultadoImport.registros_con_errores}</li>
-                <li>Duplicados: {resultadoImport.duplicados}</li>
+            <div className="mt-4 rounded-lg border border-line bg-white p-4 text-sm">
+              <p className="font-medium text-ink">Importación completada</p>
+              <ul className="mt-1 space-y-0.5 text-ink-soft">
+                <li>
+                  Registros procesados:{" "}
+                  <span className="font-mono text-ink">{resultadoImport.registros_procesados}</span>
+                </li>
+                <li>
+                  Registros importados:{" "}
+                  <span className="font-mono text-ink">{resultadoImport.registros_importados}</span>
+                </li>
+                <li>
+                  Registros con errores:{" "}
+                  <span className="font-mono text-ink">{resultadoImport.registros_con_errores}</span>
+                </li>
+                <li>
+                  Duplicados:{" "}
+                  <span className="font-mono text-ink">{resultadoImport.duplicados}</span>
+                </li>
               </ul>
               {resultadoImport.errores.length > 0 && (
                 <details className="mt-2">
@@ -249,86 +280,93 @@ export default function AdminDashboard() {
           )}
         </section>
 
+        <div className="tick-rule tight" />
+
         {/* Create meter */}
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="font-semibold text-slate-800">Crear medidor</h2>
-          <form onSubmit={handleCrearMedidor} className="mt-4 grid gap-3 sm:grid-cols-2">
+        <section className="py-6">
+          <h2 className="text-sm font-semibold text-ink">Crear medidor</h2>
+          <form onSubmit={handleCrearMedidor} className="mt-4 grid max-w-2xl gap-3 sm:grid-cols-2">
             <input
               required
               placeholder="Número de medidor"
               value={nuevoMedidor.numero_medidor}
               onChange={(e) => setNuevoMedidor({ ...nuevoMedidor, numero_medidor: e.target.value })}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-lg border border-line-strong px-3 py-2 text-sm outline-none focus:border-water-500 focus:ring-2 focus:ring-water-400"
             />
             <input
               required
               placeholder="Número de contrato"
               value={nuevoMedidor.numero_contrato}
               onChange={(e) => setNuevoMedidor({ ...nuevoMedidor, numero_contrato: e.target.value })}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-lg border border-line-strong px-3 py-2 text-sm outline-none focus:border-water-500 focus:ring-2 focus:ring-water-400"
             />
             <input
               placeholder="Nombre del titular (opcional)"
               value={nuevoMedidor.nombre_titular}
               onChange={(e) => setNuevoMedidor({ ...nuevoMedidor, nombre_titular: e.target.value })}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-lg border border-line-strong px-3 py-2 text-sm outline-none focus:border-water-500 focus:ring-2 focus:ring-water-400"
             />
             <input
               placeholder="Dirección (opcional)"
               value={nuevoMedidor.direccion}
               onChange={(e) => setNuevoMedidor({ ...nuevoMedidor, direccion: e.target.value })}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-lg border border-line-strong px-3 py-2 text-sm outline-none focus:border-water-500 focus:ring-2 focus:ring-water-400"
             />
             <button
               type="submit"
               disabled={creando}
-              className="sm:col-span-2 rounded-lg bg-water-600 px-4 py-2 text-sm font-semibold text-white hover:bg-water-700 disabled:opacity-60"
+              className="rounded-lg bg-water-600 px-4 py-2 text-sm font-semibold text-white hover:bg-water-700 disabled:opacity-60 sm:col-span-2 sm:w-fit"
             >
               {creando ? "Creando..." : "Crear medidor"}
             </button>
           </form>
         </section>
 
+        <div className="tick-rule tight" />
+
         {/* Meters list */}
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="py-6">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-            <h2 className="font-semibold text-slate-800">Medidores</h2>
+            <h2 className="text-sm font-semibold text-ink">Medidores</h2>
             <form onSubmit={handleBuscar} className="flex gap-2">
               <input
                 placeholder="Buscar por medidor o contrato"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm sm:flex-none"
+                className="min-w-0 flex-1 rounded-lg border border-line-strong px-3 py-1.5 text-sm sm:flex-none"
               />
               <button
                 type="submit"
-                className="shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
+                className="shrink-0 rounded-lg border border-line-strong px-3 py-1.5 text-sm hover:bg-white"
               >
                 Buscar
               </button>
             </form>
           </div>
 
-          {/* Mobile / tablet: stacked cards (avoids awkward horizontal scroll) */}
+          {/* Mobile / tablet: stacked cards */}
           <div className="mt-4 space-y-3 md:hidden">
             {medidores.map((m) => (
-              <div key={m.id} className="rounded-lg border border-slate-200 p-3 text-sm">
+              <div key={m.id} className="rounded-lg border border-line border-l-2 border-l-line-strong p-3 text-sm">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="font-semibold text-slate-800">{m.numero_medidor}</p>
-                    <p className="text-slate-500">Contrato: {m.numero_contrato}</p>
+                    <p className="font-mono font-semibold text-ink">{m.numero_medidor}</p>
+                    <p className="text-ink-soft">Contrato: {m.numero_contrato}</p>
                   </div>
                   <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                      m.estado === "activo"
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-slate-100 text-slate-500"
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
+                      m.estado === "activo" ? "bg-moss/10 text-moss" : "bg-line/60 text-ink-soft"
                     }`}
                   >
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        m.estado === "activo" ? "bg-moss" : "bg-ink-soft"
+                      }`}
+                    />
                     {m.estado}
                   </span>
                 </div>
-                <p className="mt-2 text-slate-600">Titular: {m.nombre_titular ?? "—"}</p>
+                <p className="mt-2 text-ink-soft">Titular: {m.nombre_titular ?? "—"}</p>
                 {m.estado === "activo" && (
                   <button
                     onClick={() => handleDesactivar(m.id)}
@@ -340,7 +378,7 @@ export default function AdminDashboard() {
               </div>
             ))}
             {medidores.length === 0 && !loading && (
-              <p className="py-6 text-center text-sm text-slate-400">
+              <p className="py-6 text-center text-sm text-ink-soft">
                 No hay medidores para mostrar.
               </p>
             )}
@@ -349,29 +387,34 @@ export default function AdminDashboard() {
           {/* Desktop / large tablet: table */}
           <div className="mt-4 hidden overflow-x-auto md:block">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600">
-                <tr>
-                  <th className="px-3 py-2 font-semibold">Medidor</th>
-                  <th className="px-3 py-2 font-semibold">Contrato</th>
-                  <th className="px-3 py-2 font-semibold">Titular</th>
-                  <th className="px-3 py-2 font-semibold">Estado</th>
-                  <th className="px-3 py-2 font-semibold">Acciones</th>
+              <thead className="text-ink-soft">
+                <tr className="border-b border-line-strong">
+                  <th className="px-3 py-2 text-xs font-medium">Medidor</th>
+                  <th className="px-3 py-2 text-xs font-medium">Contrato</th>
+                  <th className="px-3 py-2 text-xs font-medium">Titular</th>
+                  <th className="px-3 py-2 text-xs font-medium">Estado</th>
+                  <th className="px-3 py-2 text-xs font-medium">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-line">
                 {medidores.map((m) => (
                   <tr key={m.id}>
-                    <td className="px-3 py-2">{m.numero_medidor}</td>
-                    <td className="px-3 py-2">{m.numero_contrato}</td>
+                    <td className="px-3 py-2 font-mono">{m.numero_medidor}</td>
+                    <td className="px-3 py-2 font-mono">{m.numero_contrato}</td>
                     <td className="px-3 py-2">{m.nombre_titular ?? "—"}</td>
                     <td className="px-3 py-2">
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
                           m.estado === "activo"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-500"
+                            ? "bg-moss/10 text-moss"
+                            : "bg-line/60 text-ink-soft"
                         }`}
                       >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            m.estado === "activo" ? "bg-moss" : "bg-ink-soft"
+                          }`}
+                        />
                         {m.estado}
                       </span>
                     </td>
@@ -389,7 +432,7 @@ export default function AdminDashboard() {
                 ))}
                 {medidores.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={5} className="px-3 py-6 text-center text-slate-400">
+                    <td colSpan={5} className="px-3 py-6 text-center text-ink-soft">
                       No hay medidores para mostrar.
                     </td>
                   </tr>

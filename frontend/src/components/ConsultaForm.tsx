@@ -25,7 +25,7 @@ export default function ConsultaForm({ onSubmit, loading }: Props) {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-md space-y-5" noValidate>
       <div>
-        <label htmlFor="numero_medidor" className="mb-1 block text-sm font-medium text-slate-700">
+        <label htmlFor="numero_medidor" className="mb-1.5 block text-xs text-ink-soft">
           Número de medidor
         </label>
         <input
@@ -36,8 +36,8 @@ export default function ConsultaForm({ onSubmit, loading }: Props) {
           value={numeroMedidor}
           onChange={(e) => setNumeroMedidor(e.target.value)}
           placeholder="Ej. 00012345"
-          className={`w-full rounded-lg border px-4 py-3 text-base outline-none transition focus:ring-2 focus:ring-water-400 ${
-            errores.medidor ? "border-red-300" : "border-slate-300"
+          className={`w-full rounded-lg border bg-paper px-4 py-3 font-mono text-base outline-none transition focus:border-water-500 focus:bg-white focus:ring-2 focus:ring-water-400 ${
+            errores.medidor ? "border-red-300" : "border-line-strong"
           }`}
           aria-invalid={!!errores.medidor}
           aria-describedby={errores.medidor ? "error-medidor" : undefined}
@@ -50,7 +50,7 @@ export default function ConsultaForm({ onSubmit, loading }: Props) {
       </div>
 
       <div>
-        <label htmlFor="numero_contrato" className="mb-1 block text-sm font-medium text-slate-700">
+        <label htmlFor="numero_contrato" className="mb-1.5 block text-xs text-ink-soft">
           Número de contrato
         </label>
         <input
@@ -61,8 +61,8 @@ export default function ConsultaForm({ onSubmit, loading }: Props) {
           value={numeroContrato}
           onChange={(e) => setNumeroContrato(e.target.value)}
           placeholder="Ej. 987654"
-          className={`w-full rounded-lg border px-4 py-3 text-base outline-none transition focus:ring-2 focus:ring-water-400 ${
-            errores.contrato ? "border-red-300" : "border-slate-300"
+          className={`w-full rounded-lg border bg-paper px-4 py-3 font-mono text-base outline-none transition focus:border-water-500 focus:bg-white focus:ring-2 focus:ring-water-400 ${
+            errores.contrato ? "border-red-300" : "border-line-strong"
           }`}
           aria-invalid={!!errores.contrato}
           aria-describedby={errores.contrato ? "error-contrato" : undefined}
