@@ -121,35 +121,52 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-          <h1 className="font-semibold text-slate-800">Panel administrativo</h1>
-          <button onClick={handleLogout} className="text-sm text-slate-500 hover:text-slate-700">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+          <h1 className="text-sm font-semibold text-slate-800 sm:text-base">Panel administrativo</h1>
+          <button
+            onClick={handleLogout}
+            className="shrink-0 text-sm text-slate-500 hover:text-slate-700"
+          >
             Cerrar sesión
           </button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8">
         {error && <ErrorMessage message={error} />}
         {loading && <LoadingSpinner label="Cargando panel..." />}
 
         {stats && (
-          <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-500">Total medidores</p>
-              <p className="mt-1 text-2xl font-bold text-water-700">{stats.total_medidores}</p>
+          <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+              <p className="truncate text-[11px] uppercase text-slate-500 sm:text-xs">
+                Total medidores
+              </p>
+              <p className="mt-1 text-lg font-bold text-water-700 sm:text-2xl">
+                {stats.total_medidores}
+              </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-500">Total contratos</p>
-              <p className="mt-1 text-2xl font-bold text-water-700">{stats.total_contratos}</p>
+            <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+              <p className="truncate text-[11px] uppercase text-slate-500 sm:text-xs">
+                Total contratos
+              </p>
+              <p className="mt-1 text-lg font-bold text-water-700 sm:text-2xl">
+                {stats.total_contratos}
+              </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-500">Registros de consumo</p>
-              <p className="mt-1 text-2xl font-bold text-water-700">{stats.total_consumos}</p>
+            <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+              <p className="truncate text-[11px] uppercase text-slate-500 sm:text-xs">
+                Registros de consumo
+              </p>
+              <p className="mt-1 text-lg font-bold text-water-700 sm:text-2xl">
+                {stats.total_consumos}
+              </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-500">Última importación</p>
-              <p className="mt-1 text-sm font-medium text-slate-700">
+            <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+              <p className="truncate text-[11px] uppercase text-slate-500 sm:text-xs">
+                Última importación
+              </p>
+              <p className="mt-1 break-words text-xs font-medium text-slate-700 sm:text-sm">
                 {stats.ultima_importacion
                   ? new Date(stats.ultima_importacion).toLocaleString()
                   : "Sin importaciones"}
@@ -170,14 +187,17 @@ export default function AdminDashboard() {
             El archivo debe contener las columnas: numero_medidor, numero_contrato y los meses
             (enero, febrero, ...). Se procesa aquí mismo, no hace falta entrar a Supabase.
           </p>
-          <form onSubmit={handleImportar} className="mt-4 flex flex-wrap items-end gap-3">
-            <div>
+          <form
+            onSubmit={handleImportar}
+            className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
+          >
+            <div className="min-w-0 flex-1 sm:flex-none">
               <label className="mb-1 block text-xs font-medium text-slate-600">Archivo</label>
               <input
                 type="file"
                 accept=".csv,.xlsx,.xls"
                 onChange={(e) => setArchivo(e.target.files?.[0] ?? null)}
-                className="text-sm"
+                className="w-full text-sm"
               />
             </div>
             <div>
@@ -186,7 +206,7 @@ export default function AdminDashboard() {
                 type="number"
                 value={anioImport}
                 onChange={(e) => setAnioImport(Number(e.target.value))}
-                className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sm:w-24"
               />
             </div>
             <label className="flex items-center gap-2 text-sm text-slate-600">
@@ -200,7 +220,7 @@ export default function AdminDashboard() {
             <button
               type="submit"
               disabled={!archivo || importando}
-              className="rounded-lg bg-water-600 px-4 py-2 text-sm font-semibold text-white hover:bg-water-700 disabled:opacity-60"
+              className="w-full rounded-lg bg-water-600 px-4 py-2 text-sm font-semibold text-white hover:bg-water-700 disabled:opacity-60 sm:w-auto"
             >
               {importando ? "Importando..." : "Importar"}
             </button>
@@ -278,19 +298,57 @@ export default function AdminDashboard() {
                 placeholder="Buscar por medidor o contrato"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm sm:flex-none"
               />
               <button
                 type="submit"
-                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
+                className="shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
               >
                 Buscar
               </button>
             </form>
           </div>
 
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[600px] text-left text-sm">
+          {/* Mobile / tablet: stacked cards (avoids awkward horizontal scroll) */}
+          <div className="mt-4 space-y-3 md:hidden">
+            {medidores.map((m) => (
+              <div key={m.id} className="rounded-lg border border-slate-200 p-3 text-sm">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-800">{m.numero_medidor}</p>
+                    <p className="text-slate-500">Contrato: {m.numero_contrato}</p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                      m.estado === "activo"
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {m.estado}
+                  </span>
+                </div>
+                <p className="mt-2 text-slate-600">Titular: {m.nombre_titular ?? "—"}</p>
+                {m.estado === "activo" && (
+                  <button
+                    onClick={() => handleDesactivar(m.id)}
+                    className="mt-2 text-xs font-medium text-red-600 hover:underline"
+                  >
+                    Desactivar
+                  </button>
+                )}
+              </div>
+            ))}
+            {medidores.length === 0 && !loading && (
+              <p className="py-6 text-center text-sm text-slate-400">
+                No hay medidores para mostrar.
+              </p>
+            )}
+          </div>
+
+          {/* Desktop / large tablet: table */}
+          <div className="mt-4 hidden overflow-x-auto md:block">
+            <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-slate-600">
                 <tr>
                   <th className="px-3 py-2 font-semibold">Medidor</th>
